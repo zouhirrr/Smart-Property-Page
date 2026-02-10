@@ -3,84 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مولد الكبسولة الرقمية</title>
+    <title>مولد الأوامر الذكي | Qrestige</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #6366f1; }
-        body { font-family: 'Tajawal', sans-serif; background: #f8fafc; display: flex; justify-content: center; padding: 20px; }
-        .creator-card { background: white; padding: 30px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); width: 100%; max-width: 450px; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; outline: none; }
-        .btn { background: var(--p); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; font-size: 18px; }
-        #qr-output { display: none; margin-top: 30px; text-align: center; border-top: 2px solid #f1f5f9; padding-top: 20px; }
-        .preview-box { border: 2px dashed var(--p); padding: 10px; border-radius: 16px; display: inline-block; background: white; }
+        body { font-family: 'Tajawal', sans-serif; background: #111827; color: white; display: flex; justify-content: center; padding: 20px; min-height: 100vh; align-items: center; margin: 0; }
+        .container { background: #1f2937; padding: 30px; border-radius: 24px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid #374151; }
+        
+        h2 { text-align: center; color: #f59e0b; margin-top: 0; }
+        
+        /* أزرار التبديل */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: #374151; padding: 5px; border-radius: 12px; }
+        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; font-size: 12px; font-weight: 700; color: #9ca3af; transition: 0.3s; }
+        .tab.active { background: #f59e0b; color: #000; }
+
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; margin-bottom: 5px; color: #d1d5db; }
+        input, textarea { width: 100%; padding: 12px; background: #111827; border: 1px solid #4b5563; color: white; border-radius: 10px; outline: none; box-sizing: border-box; }
+        input:focus { border-color: #f59e0b; }
+
+        .btn-gen { background: #f59e0b; color: #000; width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .btn-gen:hover { background: #d97706; }
+
+        #qr-area { display: none; text-align: center; margin-top: 25px; background: white; padding: 20px; border-radius: 15px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div class="creator-card">
-    <h2 style="margin:0; color:#1e293b;">الكبسولة الرقمية ✉️</h2>
-    <p style="color:#64748b; font-size:14px; margin-bottom:20px;">أنشئ تجربة فريدة لزبونك مخزنة داخل كود</p>
+<div class="container">
+    <h2>⚡ مولد الأوامر المباشرة</h2>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="setMode('whatsapp')">واتساب 💬</div>
+        <div class="tab" onclick="setMode('maps')">خريطة 📍</div>
+        <div class="tab" onclick="setMode('call')">اتصال 📞</div>
+        <div class="tab" onclick="setMode('wifi')">واي فاي 📶</div>
+    </div>
 
-    <input type="text" id="guestName" placeholder="اسم الزبون (مثلاً: السيد خالد)">
-    <textarea id="message" rows="3" placeholder="اكتب رسالتك الخاصة هنا..."></textarea>
-    <label style="font-size:12px; font-weight:900; color:#64748b;">اختر لون التجربة:</label>
-    <select id="colorTheme">
-        <option value="6366f1">بنفسجي ملكي</option>
-        <option value="059669">أخضر زمردي</option>
-        <option value="dc2626">أحمر كلاسيكي</option>
-        <option value="d97706">ذهبي فاخر</option>
-    </select>
+    <div id="form-whatsapp" class="input-group">
+        <label>رقمك (مع مفتاح الدولة بدون +)</label>
+        <input type="number" id="wa-phone" placeholder="9665xxxxxxxx">
+        <label>الرسالة الجاهزة للزبون</label>
+        <textarea id="wa-text" rows="2" placeholder="أنا مهتم بهذا العقار..."></textarea>
+    </div>
 
-    <button class="btn" onclick="generateMagicQR()">توليد الكبسولة 🪄</button>
+    <div id="form-maps" class="input-group hidden">
+        <label>رابط الموقع من جوجل ماب (أو الإحداثيات)</label>
+        <input type="text" id="map-link" placeholder="https://maps.google.com/...">
+        <p style="font-size:10px; color:#9ca3af;">نصيحة: افتح جوجل ماب، اضغط مشاركة، انسخ الرابط وضعه هنا.</p>
+    </div>
 
-    <div id="qr-output">
-        <div class="preview-box">
-            <div id="qrcode"></div>
-        </div>
-        <p style="font-weight:900; margin-top:15px; color:#1e293b;">أرسل هذا الكود للزبون ✅</p>
-        <p style="font-size:11px; color:#94a3b8;">بمجرد المسح، سيظهر له تصميم خاص برسالته ولونه المفضل</p>
+    <div id="form-call" class="input-group hidden">
+        <label>رقم الهاتف للاتصال المباشر</label>
+        <input type="tel" id="call-phone" placeholder="05xxxxxxxx">
+    </div>
+
+    <div id="form-wifi" class="input-group hidden">
+        <label>اسم الشبكة (SSID)</label>
+        <input type="text" id="wifi-ssid">
+        <label>كلمة المرور</label>
+        <input type="text" id="wifi-pass">
+        <label>نوع التشفير</label>
+        <select id="wifi-type" style="width:100%; padding:10px; border-radius:10px; background:#111827; color:white; border:1px solid #4b5563;">
+            <option value="WPA">WPA/WPA2</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass">مفتوحة</option>
+        </select>
+    </div>
+
+    <button class="btn-gen" onclick="generateActionQR()">توليد الكود الآن 🚀</button>
+
+    <div id="qr-area">
+        <div id="qr-image"></div>
+        <p style="color:black; font-weight:bold; margin-top:10px;">امسح الكود لتنفيذ الأمر فوراً!</p>
     </div>
 </div>
 
 <script>
-function generateMagicQR() {
-    const name = document.getElementById('guestName').value;
-    const msg = document.getElementById('message').value;
-    const color = document.getElementById('colorTheme').value;
+    let currentMode = 'whatsapp';
 
-    if(!name || !msg) return alert("فضلاً أكمل البيانات");
+    function setMode(mode) {
+        currentMode = mode;
+        // تحديث الأزرار
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
 
-    // تشفير البيانات في الرابط (Base64) لكي لا تظهر بوضوح وتكون مخزنة في URL
-    const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ n: name, m: msg, c: color }))));
-    
-    // هذا الرابط سيعرض البيانات عند فتحه (نستخدم نفس الصفحة للعرض)
-    const finalURL = window.location.href.split('?')[0] + "?data=" + payload;
-
-    // توليد الكود باستخدام محرك جوجل
-    const qrImg = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(finalURL)}&choe=UTF-8`;
-    
-    document.getElementById('qrcode').innerHTML = `<img src="${qrImg}" style="width:180px">`;
-    document.getElementById('qr-output').style.display = 'block';
-}
-
-// كود "الاستقبال" - يعمل عند مسح الزبون للكود
-window.onload = function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const data = urlParams.get('data');
-
-    if(data) {
-        const decoded = JSON.parse(decodeURIComponent(escape(atob(data))));
-        document.body.innerHTML = `
-            <div style="background:#${decoded.c}; height:100vh; width:100vw; display:flex; align-items:center; justify-content:center; color:white; text-align:center; padding:30px; box-sizing:border-box;">
-                <div>
-                    <h1 style="font-size:40px; margin-bottom:10px;">أهلاً ${decoded.n} ✨</h1>
-                    <p style="font-size:20px; line-height:1.6; opacity:0.9;">${decoded.m}</p>
-                    <div style="margin-top:40px; border-top:1px solid rgba(255,255,255,0.3); padding-top:20px; font-size:12px;">شكراً لاختيارك خدماتنا</div>
-                </div>
-            </div>
-        `;
+        // إخفاء وإظهار الحقول
+        document.querySelectorAll('.input-group').forEach(g => g.classList.add('hidden'));
+        document.getElementById('form-' + mode).classList.remove('hidden');
+        document.getElementById('qr-area').style.display = 'none';
     }
-}
+
+    function generateActionQR() {
+        let finalData = "";
+
+        if (currentMode === 'whatsapp') {
+            const ph = document.getElementById('wa-phone').value;
+            const txt = document.getElementById('wa-text').value;
+            if(!ph) return alert("أدخل الرقم");
+            // رابط واتساب العالمي
+            finalData = `https://wa.me/${ph}?text=${encodeURIComponent(txt)}`;
+        } 
+        else if (currentMode === 'maps') {
+            const loc = document.getElementById('map-link').value;
+            if(!loc) return alert("أدخل الرابط");
+            finalData = loc;
+        } 
+        else if (currentMode === 'call') {
+            const ph = document.getElementById('call-phone').value;
+            if(!ph) return alert("أدخل الرقم");
+            // بروتوكول الاتصال
+            finalData = `tel:${ph}`;
+        }
+        else if (currentMode === 'wifi') {
+            const ssid = document.getElementById('wifi-ssid').value;
+            const pass = document.getElementById('wifi-pass').value;
+            const type = document.getElementById('wifi-type').value;
+            if(!ssid) return alert("أدخل اسم الشبكة");
+            // بروتوكول الواي فاي
+            finalData = `WIFI:T:${type};S:${ssid};P:${pass};;`;
+        }
+
+        // استخدام Google Chart API لضمان العمل 100% بدون أخطاء مكتبات
+        const qrUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(finalData)}&choe=UTF-8`;
+        
+        document.getElementById('qr-image').innerHTML = `<img src="${qrUrl}" style="width:100%; border-radius:10px;">`;
+        document.getElementById('qr-area').style.display = 'block';
+    }
 </script>
 
 </body>
