@@ -3,161 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم المعرض العقاري</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <title>مولد البطاقة العقارية الفورية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --main: #1e293b; --gold: #f59e0b; --bg: #f8fafc; }
-        * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        body { background: var(--bg); margin: 0; padding: 20px; color: var(--main); }
-
-        .app-grid { display: grid; grid-template-columns: 350px 1fr; gap: 20px; max-width: 1200px; margin: auto; }
-
-        /* لوحة التحكم (إضافة العروض) */
-        .admin-sidebar { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); height: fit-content; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 12px; font-weight: 900; margin-bottom: 5px; color: #64748b; }
-        input, textarea { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; }
-        input:focus { border-color: var(--gold); }
-        
-        .btn-add { width: 100%; background: var(--main); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 900; cursor: pointer; margin-top: 10px; }
-        
-        /* معرض العروض (الموقع العام) */
-        .gallery-area { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .gallery-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px; }
-        
-        .properties-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .prop-card { background: white; border: 1px solid #eee; border-radius: 15px; overflow: hidden; transition: 0.3s; }
-        .prop-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .prop-img { height: 150px; background: #ddd center/cover; }
-        .prop-info { padding: 15px; }
-        
-        /* منطقة الـ QR كود */
-        .qr-section { text-align: center; background: #fffbeb; padding: 20px; border-radius: 15px; border: 2px dashed var(--gold); margin-top: 20px; }
-        #qrcode { display: flex; justify-content: center; margin: 15px 0; }
-
-        @media (max-width: 900px) { .app-grid { grid-template-columns: 1fr; } }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f4f8; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; outline: none; }
+        input:focus { border-color: #1a237e; }
+        button { background: #1a237e; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-weight: 900; cursor: pointer; width: 100%; font-size: 18px; }
+        #qr-result { margin-top: 25px; display: none; padding: 20px; border: 2px dashed #1a237e; border-radius: 15px; background: #f8faff; }
+        img { max-width: 100%; height: auto; }
     </style>
 </head>
 <body>
 
-<div class="app-grid">
-    
-    <aside class="admin-sidebar">
-        <h2 style="margin-top:0;">إضافة عرض جديد</h2>
-        <div class="form-group">
-            <label>صورة العقار (رابط أو ارفق ملف)</label>
-            <input type="file" id="p-file" accept="image/*">
-        </div>
-        <div class="form-group">
-            <label>عنوان العقار</label>
-            <input type="text" id="p-title" placeholder="مثلاً: فيلا حي النرجس">
-        </div>
-        <div class="form-group">
-            <label>السعر</label>
-            <input type="text" id="p-price" placeholder="2,500,000">
-        </div>
-        <button class="btn-add" onclick="addProperty()">نشر العرض في المعرض ✨</button>
+<div class="card">
+    <h2 style="color: #1a237e; margin-bottom: 5px;">Qrestige Lite 🚀</h2>
+    <p style="color: #64748b; font-size: 14px; margin-bottom: 25px;">ولد كود عقارك فوراً وبدون تعقيد</p>
 
-        <div class="qr-section">
-            <label>كود معرضك الشخصي</label>
-            <div id="qrcode"></div>
-            <p style="font-size: 11px; margin:0;">هذا الكود يفتح للزبائن "جميع العروض"</p>
-            <button onclick="generateProfileQR()" style="margin-top:10px; background:none; border:1px solid #ddd; cursor:pointer; font-size:11px; border-radius:5px;">تحديث الكود</button>
-        </div>
-    </aside>
+    <input type="text" id="title" placeholder="اسم العقار (مثلاً: فيلا النرجس)">
+    <input type="text" id="price" placeholder="السعر (مثلاً: 2.5 مليون)">
+    <input type="tel" id="phone" placeholder="رقم الواتساب (مثال: 9665000000)">
+    <textarea id="desc" rows="3" placeholder="وصف مختصر للعقار..."></textarea>
 
-    <main class="gallery-area">
-        <div class="gallery-header">
-            <div>
-                <h1 style="margin:0;">معرض العقارات الرقمي</h1>
-                <p style="margin:0; color:#64748b; font-size:14px;">جميع العروض المتاحة حالياً</p>
-            </div>
-            <div id="stats-total" style="background:var(--main); color:white; padding:10px 20px; border-radius:12px; text-align:center;">
-                <span style="font-size:10px; display:block;">إجمالي المشاهدات</span>
-                <b id="total-views-val">0</b>
-            </div>
-        </div>
+    <button onclick="generateSafeQR()">توليد الكود الآن 🔥</button>
 
-        <div class="properties-grid" id="main-gallery">
-            </div>
-    </main>
+    <div id="qr-result">
+        <p style="font-weight: 900; color: #1a237e;">جاهز للمسح! ✅</p>
+        <div id="qr-image-container"></div>
+        <p style="font-size: 12px; color: #475569; margin-top: 10px;">هذا الكود يحتوي على كافة التفاصيل بالداخل. صوره وأرسله للزبون.</p>
+        <button onclick="window.print()" style="background:#64748b; margin-top:10px; font-size:14px;">طباعة الكود</button>
+    </div>
 </div>
 
 <script>
-    // قاعدة بيانات وهمية (تُخزن في المتصفح حالياً)
-    let myProperties = JSON.parse(localStorage.getItem('my_listings') || "[]");
-    let totalViews = localStorage.getItem('total_views') || 0;
+function generateSafeQR() {
+    const title = document.getElementById('title').value;
+    const price = document.getElementById('price').value;
+    const phone = document.getElementById('phone').value;
+    const desc = document.getElementById('desc').value;
 
-    // وظيفة إضافة عقار جديد
-    function addProperty() {
-        const title = document.getElementById('p-title').value;
-        const price = document.getElementById('p-price').value;
-        const fileInput = document.getElementById('p-file');
-
-        if(!title || !price) return alert("أكمل البيانات");
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const newProp = {
-                id: Date.now(),
-                title: title,
-                price: price,
-                img: e.target.result
-            };
-            myProperties.push(newProp);
-            localStorage.setItem('my_listings', JSON.stringify(myProperties));
-            renderGallery();
-            // تصفير الحقول
-            document.getElementById('p-title').value = "";
-            document.getElementById('p-price').value = "";
-        };
-        
-        if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
-        else alert("ارفق صورة للعقار");
+    if(!title || !phone) {
+        alert("لطفاً أدخل الاسم ورقم الجوال");
+        return;
     }
 
-    // وظيفة عرض المعرض
-    function renderGallery() {
-        const container = document.getElementById('main-gallery');
-        container.innerHTML = myProperties.map(p => `
-            <div class="prop-card">
-                <div class="prop-img" style="background-image: url('${p.img}')"></div>
-                <div class="prop-info">
-                    <h3 style="margin:0; font-size:16px;">${p.title}</h3>
-                    <p style="color:var(--gold); font-weight:900; margin:10px 0;">${p.price} ر.س</p>
-                    <button onclick="deleteProp(${p.id})" style="background:#fee2e2; color:#b91c1c; border:none; padding:5px 10px; border-radius:5px; font-size:11px; cursor:pointer;">حذف</button>
-                </div>
-            </div>
-        `).join('');
-        
-        document.getElementById('total-views-val').innerText = totalViews;
-    }
+    // بناء النص الذي سيظهر للزبون عند مسح الكود
+    const content = `
+🏠 عقار: ${title}
+💰 السعر: ${price}
+📝 التفاصيل: ${desc}
+📞 للتواصل واتساب: https://wa.me/${phone}
+    `.trim();
 
-    // وظيفة توليد QR للملف الشخصي بالكامل
-    function generateProfileQR() {
-        const qrDiv = document.getElementById("qrcode");
-        qrDiv.innerHTML = "";
-        // الرابط هنا يشير إلى صفحة "المعرض" الخاصة بصاحب الموقع
-        new QRCode(qrDiv, {
-            text: window.location.href + "?user=admin",
-            width: 140,
-            height: 140
-        });
-    }
+    // استخدام Google Chart API لضمان التوليد 100% بدون مكتبات خارجية
+    const qrUrl = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(content)}&choe=UTF-8`;
 
-    function deleteProp(id) {
-        myProperties = myProperties.filter(p => p.id !== id);
-        localStorage.setItem('my_listings', JSON.stringify(myProperties));
-        renderGallery();
-    }
-
-    // تشغيل النظام
-    renderGallery();
-    generateProfileQR();
+    const container = document.getElementById('qr-image-container');
+    container.innerHTML = `<img src="${qrUrl}" alt="QR Code">`;
     
-    // محاكاة زيادة المشاهدات عند كل دخول
-    localStorage.setItem('total_views', parseInt(totalViews) + 1);
+    document.getElementById('qr-result').style.display = 'block';
+}
 </script>
 
 </body>
