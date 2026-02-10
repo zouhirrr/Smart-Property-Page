@@ -2,112 +2,71 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مولد الموقع المحمول | Serverless QR</title>
+    <title>نظام الطاولة الذكية | Smart Menu</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { font-family: 'Tajawal', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .editor { background: #1e293b; padding: 30px; border-radius: 20px; width: 100%; max-width: 500px; border: 1px solid #334155; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; padding: 40px; }
+        .setup-panel { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 30px; width: 350px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; background: #e67e22; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
-        h2 { color: #38bdf8; margin-top: 0; text-align: center; }
-        .note { font-size: 12px; color: #94a3b8; text-align: center; margin-bottom: 20px; }
-
-        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; outline: none; }
-        
-        .btn-add { background: #38bdf8; color: #000; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 900; cursor: pointer; margin-top: 15px; font-size: 16px; }
-        .btn-add:hover { background: #0ea5e9; }
-
-        #qr-container { display: none; margin-top: 30px; background: white; padding: 20px; border-radius: 15px; text-align: center; }
-        #qr-code { display: flex; justify-content: center; }
+        /* تصميم الملصق الذي سيطبع */
+        .sticker { 
+            background: white; width: 300px; padding: 20px; border-radius: 20px; 
+            text-align: center; border: 3px solid #e67e22; display: none;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .restaurant-name { font-size: 22px; font-weight: 900; color: #333; margin-bottom: 5px; }
+        .table-number { background: #e67e22; color: white; display: inline-block; padding: 5px 20px; border-radius: 50px; font-size: 14px; margin-bottom: 15px; }
+        #qrcode { display: flex; justify-content: center; margin: 15px 0; }
+        .instruction { font-size: 14px; color: #666; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="editor">
-    <h2>⚡ موقعك الكامل داخل الكود</h2>
-    <p class="note">هذا النظام يضغط كود الموقع HTML داخل الـ QR مباشرة!</p>
+<div class="setup-panel">
+    <h3>إعداد ملصق الطاولة 🍽️</h3>
+    <input type="text" id="restName" placeholder="اسم المطعم">
+    <input type="number" id="tableNum" placeholder="رقم الطاولة">
+    <input type="tel" id="waPhone" placeholder="رقم واتساب الطلبات (966...)">
+    <button onclick="generateSticker()">إنشاء ملصق الطاولة ✨</button>
+</div>
 
-    <label>اسم براندك / شركتك</label>
-    <input type="text" id="siteName" placeholder="مثلاً: عقارات النخبة">
-
-    <label>لون الخلفية المفضل</label>
-    <select id="bgColor">
-        <option value="#000000">أسود فخم</option>
-        <option value="#1a237e">أزرق ملكي</option>
-        <option value="#b91c1c">أحمر جريء</option>
-        <option value="#064e3b">أخضر غامق</option>
-    </select>
-
-    <label>رابط واتساب</label>
-    <input type="text" id="link1" placeholder="https://wa.me/966...">
-    
-    <label>رابط الموقع / المتجر</label>
-    <input type="text" id="link2" placeholder="https://...">
-
-    <label>رابط اللوكيشن (جوجل ماب)</label>
-    <input type="text" id="link3" placeholder="https://maps.google...">
-
-    <button class="btn-add" onclick="generateMicroSite()">اصنع الموقع واضغطه في QR 🚀</button>
-
-    <div id="qr-container">
-        <div id="qr-code"></div>
-        <p style="color:black; font-weight:bold; margin-top:10px;">امسح الكود وشاهد السحر!</p>
-        <p style="color:#666; font-size:11px;">ملاحظة: الكود كثيف لأنه يحتوي على الموقع كاملاً</p>
-    </div>
+<div id="sticker-area" class="sticker">
+    <div class="restaurant-name" id="display-name">اسم المطعم</div>
+    <div class="table-number">طاولة رقم <span id="display-table">0</span></div>
+    <div id="qrcode"></div>
+    <p class="instruction">امسح الكود لطلب الخدمة فوراُ 📱</p>
+    <div style="font-size: 10px; color: #ccc; margin-top: 10px;">Powered by Qrestige</div>
 </div>
 
 <script>
-function generateMicroSite() {
-    const name = document.getElementById('siteName').value || "موقعي الشخصي";
-    const bg = document.getElementById('bgColor').value;
-    const l1 = document.getElementById('link1').value;
-    const l2 = document.getElementById('link2').value;
-    const l3 = document.getElementById('link3').value;
+function generateSticker() {
+    const name = document.getElementById('restName').value;
+    const table = document.getElementById('tableNum').value;
+    const phone = document.getElementById('waPhone').value;
 
-    // هنا السحر: نحن نكتب كود HTML صغير جداً (Minified)
-    // ونستخدم Emoji كأيقونات لتوفير المساحة
-    let htmlContent = `
-    <!DOCTYPE html>
-    <html dir="rtl">
-    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-    <style>body{background:${bg};color:#fff;font-family:sans-serif;text-align:center;padding:40px 20px;display:flex;flex-direction:column;justify-content:center;min-height:90vh}h1{margin-bottom:30px;font-size:28px}.btn{background:#fff;color:#000;display:block;padding:15px;margin:10px 0;text-decoration:none;border-radius:50px;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(0,0,0,0.2)}.btn:hover{transform:scale(1.02)}</style>
-    </head>
-    <body>
-        <h1>${name} ✨</h1>
-        ${l1 ? `<a class="btn" href="${l1}">💬 تواصل واتساب</a>` : ''}
-        ${l2 ? `<a class="btn" href="${l2}">🌐 زيارة الموقع</a>` : ''}
-        ${l3 ? `<a class="btn" href="${l3}">📍 الموقع الجغرافي</a>` : ''}
-        <p style="margin-top:30px;font-size:12px;opacity:0.6">تم الحفظ عبر Qrestige</p>
-    </body>
-    </html>
-    `;
+    if(!name || !table || !phone) return alert("فضلاً أكمل البيانات");
 
-    // ضغط الكود وإزالة المسافات الزائدة لتقليل حجم الـ QR
-    htmlContent = htmlContent.replace(/\s+/g, ' ').trim();
+    document.getElementById('display-name').innerText = name;
+    document.getElementById('display-table').innerText = table;
 
-    // تحويل الكود إلى صيغة Data URI التي تفهمها المتصفحات
-    const dataURI = "data:text/html;charset=utf-8," + encodeURIComponent(htmlContent);
+    // الرابط الذي سيفتحه الزبون
+    const waLink = `https://wa.me/${phone}?text=${encodeURIComponent("أهلاً " + name + "، أنا على الطاولة رقم (" + table + ") وأود الطلب من فضلك.")}`;
 
-    // التحقق من الطول (QR Code له سعة محددة)
-    if (dataURI.length > 2500) {
-        alert("البيانات كثيرة جداً! حاول تقليل الروابط.");
-        return;
-    }
-
-    const qrDiv = document.getElementById("qr-code");
+    const qrDiv = document.getElementById("qrcode");
     qrDiv.innerHTML = "";
-
     new QRCode(qrDiv, {
-        text: dataURI,
-        width: 250,
-        height: 250,
+        text: waLink,
+        width: 180,
+        height: 180,
         colorDark : "#000000",
         colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.L // L allows for more data density
+        correctLevel : QRCode.CorrectLevel.H
     });
 
-    document.getElementById('qr-container').style.display = 'block';
+    document.getElementById('sticker-area').style.display = 'block';
 }
 </script>
 
