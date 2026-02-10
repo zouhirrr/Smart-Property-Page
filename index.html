@@ -3,63 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مولد مفتاح العقار الرقمي</title>
+    <title>مولد الكبسولة الرقمية</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Tajawal', sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; padding: 20px; }
-        .box { background: #1e293b; padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; text-align: center; border: 1px solid #334155; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 10px; background: #334155; color: white; outline: none; }
-        button { background: #f59e0b; color: #000; border: none; padding: 15px; border-radius: 10px; font-weight: 900; width: 100%; cursor: pointer; margin-top: 10px; }
-        #qr-display { margin-top: 20px; background: white; padding: 15px; border-radius: 15px; display: none; }
-        .info-text { font-size: 12px; color: #94a3b8; margin-top: 15px; }
+        :root { --p: #6366f1; }
+        body { font-family: 'Tajawal', sans-serif; background: #f8fafc; display: flex; justify-content: center; padding: 20px; }
+        .creator-card { background: white; padding: 30px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); width: 100%; max-width: 450px; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; outline: none; }
+        .btn { background: var(--p); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; font-size: 18px; }
+        #qr-output { display: none; margin-top: 30px; text-align: center; border-top: 2px solid #f1f5f9; padding-top: 20px; }
+        .preview-box { border: 2px dashed var(--p); padding: 10px; border-radius: 16px; display: inline-block; background: white; }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <h2 style="color: #f59e0b;">vCard Property Key 🔑</h2>
-    <p style="font-size: 14px;">حول عقارك لجهة اتصال في هاتف الزبون</p>
+<div class="creator-card">
+    <h2 style="margin:0; color:#1e293b;">الكبسولة الرقمية ✉️</h2>
+    <p style="color:#64748b; font-size:14px; margin-bottom:20px;">أنشئ تجربة فريدة لزبونك مخزنة داخل كود</p>
 
-    <input type="text" id="propName" placeholder="اسم العقار (مثلاً: بنتهاوس مارينا)">
-    <input type="text" id="propPrice" placeholder="السعر (مثلاً: 3,000,000 ر.س)">
-    <input type="tel" id="myPhone" placeholder="رقم هاتفك (مثلاً: 9665xxxxx)">
-    <input type="text" id="propLink" placeholder="رابط فيديو أو موقع (اختياري)">
+    <input type="text" id="guestName" placeholder="اسم الزبون (مثلاً: السيد خالد)">
+    <textarea id="message" rows="3" placeholder="اكتب رسالتك الخاصة هنا..."></textarea>
+    <label style="font-size:12px; font-weight:900; color:#64748b;">اختر لون التجربة:</label>
+    <select id="colorTheme">
+        <option value="6366f1">بنفسجي ملكي</option>
+        <option value="059669">أخضر زمردي</option>
+        <option value="dc2626">أحمر كلاسيكي</option>
+        <option value="d97706">ذهبي فاخر</option>
+    </select>
 
-    <button onclick="generateVCardQR()">توليد مفتاح العقار 🚀</button>
+    <button class="btn" onclick="generateMagicQR()">توليد الكبسولة 🪄</button>
 
-    <div id="qr-display">
-        <div id="qr-holder"></div>
-        <p style="color: #000; font-weight: 900; margin-top: 10px; font-size: 14px;">جاهز للمسح والحفظ ✅</p>
+    <div id="qr-output">
+        <div class="preview-box">
+            <div id="qrcode"></div>
+        </div>
+        <p style="font-weight:900; margin-top:15px; color:#1e293b;">أرسل هذا الكود للزبون ✅</p>
+        <p style="font-size:11px; color:#94a3b8;">بمجرد المسح، سيظهر له تصميم خاص برسالته ولونه المفضل</p>
     </div>
-
-    <p class="info-text">بمجرد المسح، سيطلب الهاتف حفظ "عقارك" في قائمة الأسماء فوراً.</p>
 </div>
 
 <script>
-function generateVCardQR() {
-    const name = document.getElementById('propName').value;
-    const price = document.getElementById('propPrice').value;
-    const phone = document.getElementById('myPhone').value;
-    const link = document.getElementById('propLink').value;
+function generateMagicQR() {
+    const name = document.getElementById('guestName').value;
+    const msg = document.getElementById('message').value;
+    const color = document.getElementById('colorTheme').value;
 
-    if(!name || !phone) return alert("أدخل البيانات الأساسية");
+    if(!name || !msg) return alert("فضلاً أكمل البيانات");
 
-    // تنسيق vCard العالمي
-    const vCard = `BEGIN:VCARD
-VERSION:3.0
-FN:${name}
-ORG:السعر: ${price}
-TEL:${phone}
-URL:${link}
-NOTE:تفاصيل العقار المعروض
-END:VCARD`;
+    // تشفير البيانات في الرابط (Base64) لكي لا تظهر بوضوح وتكون مخزنة في URL
+    const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ n: name, m: msg, c: color }))));
+    
+    // هذا الرابط سيعرض البيانات عند فتحه (نستخدم نفس الصفحة للعرض)
+    const finalURL = window.location.href.split('?')[0] + "?data=" + payload;
 
-    // استخدام Google API للتوليد الفوري
-    const qrUrl = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(vCard)}&choe=UTF-8`;
+    // توليد الكود باستخدام محرك جوجل
+    const qrImg = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(finalURL)}&choe=UTF-8`;
+    
+    document.getElementById('qrcode').innerHTML = `<img src="${qrImg}" style="width:180px">`;
+    document.getElementById('qr-output').style.display = 'block';
+}
 
-    const holder = document.getElementById('qr-holder');
-    holder.innerHTML = `<img src="${qrUrl}" style="width:100%">`;
-    document.getElementById('qr-display').style.display = 'block';
+// كود "الاستقبال" - يعمل عند مسح الزبون للكود
+window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const data = urlParams.get('data');
+
+    if(data) {
+        const decoded = JSON.parse(decodeURIComponent(escape(atob(data))));
+        document.body.innerHTML = `
+            <div style="background:#${decoded.c}; height:100vh; width:100vw; display:flex; align-items:center; justify-content:center; color:white; text-align:center; padding:30px; box-sizing:border-box;">
+                <div>
+                    <h1 style="font-size:40px; margin-bottom:10px;">أهلاً ${decoded.n} ✨</h1>
+                    <p style="font-size:20px; line-height:1.6; opacity:0.9;">${decoded.m}</p>
+                    <div style="margin-top:40px; border-top:1px solid rgba(255,255,255,0.3); padding-top:20px; font-size:12px;">شكراً لاختيارك خدماتنا</div>
+                </div>
+            </div>
+        `;
+    }
 }
 </script>
 
