@@ -3,132 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qrestige Pro | مولد عقاراتك الذكي</title>
+    <title>Qrestige Pro | نظام إدارة العقارات</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --primary: #1e293b; --accent: #f59e0b; --success: #10b981; }
+        :root { --primary: #0f172a; --accent: #f59e0b; --success: #10b981; }
         * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        body { background: #f1f5f9; margin: 0; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        body { background: #f8fafc; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
 
-        /* لوحة الإدخال */
+        /* لوحة التحكم */
         .admin-panel { 
-            background: white; width: 100%; max-width: 600px; padding: 30px; 
-            border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 30px;
+            background: white; width: 100%; max-width: 650px; padding: 30px; 
+            border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); margin-bottom: 30px;
         }
-        .admin-panel h2 { color: var(--primary); margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        .admin-panel h2 { color: var(--primary); margin-top: 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; }
         
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 13px; font-weight: 700; color: #64748b; margin-bottom: 5px; }
-        input, textarea { 
-            width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; 
-            outline: none; transition: 0.3s; font-size: 15px;
+        .full-width { grid-column: span 2; }
+        
+        label { display: block; font-size: 13px; font-weight: 800; color: #475569; margin-bottom: 6px; }
+        input, textarea, .file-input { 
+            width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; 
+            outline: none; transition: 0.3s; font-size: 14px;
         }
         input:focus { border-color: var(--accent); }
 
-        /* منطقة الـ QR كود */
-        .qr-result { 
-            background: #fff; padding: 20px; border-radius: 15px; text-align: center; 
-            display: none; border: 2px dashed var(--accent); margin-top: 20px;
-        }
-        #qrcode { display: inline-block; padding: 10px; background: white; }
-
+        /* زر التوليد */
         .btn-generate { 
             width: 100%; background: var(--primary); color: white; border: none; 
-            padding: 15px; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 16px;
+            padding: 16px; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 16px; margin-top: 10px;
         }
-        .btn-generate:hover { background: #0f172a; }
+        .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        /* منطقة الـ QR */
+        .qr-wrapper { 
+            display: none; margin-top: 25px; padding: 20px; border: 2px dashed var(--accent); 
+            border-radius: 20px; text-align: center; background: #fffcf5;
+        }
+        #qrcode { display: inline-block; padding: 10px; background: white; border-radius: 10px; }
 
         /* معاينة الجوال */
-        .preview-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
+        .phone-mockup { 
+            width: 100%; max-width: 360px; border: 10px solid #1e293b; border-radius: 40px; 
+            background: white; position: relative; overflow: hidden; height: 600px; box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+        }
+        .mock-screen { height: 100%; overflow-y: auto; scrollbar-width: none; }
     </style>
 </head>
 <body>
 
     <div class="admin-panel">
-        <h2>🛠️ إعداد بيانات العقار</h2>
+        <h2>🏗️ لوحة إضافة عقار جديد</h2>
         
-        <div class="form-group">
-            <label>عنوان العقار (مثلاً: فيلا مودرن للبيع)</label>
-            <input type="text" id="in-title" placeholder="أدخل العنوان هنا..." oninput="updatePreview()">
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label>صورة العقار</label>
+                <input type="file" id="in-img" accept="image/*" onchange="previewImage(this)">
+            </div>
+
+            <div class="form-group">
+                <label>العنوان</label>
+                <input type="text" id="in-title" placeholder="فيلا مودرن..." oninput="sync()">
+            </div>
+
+            <div class="form-group">
+                <label>السعر (ر.س)</label>
+                <input type="text" id="in-price" placeholder="2,500,000" oninput="sync()">
+            </div>
+
+            <div class="form-group full-width">
+                <label>الوصف</label>
+                <textarea id="in-desc" rows="2" placeholder="اكتب تفاصيل العقار هنا..." oninput="sync()"></textarea>
+            </div>
+
+            <div class="form-group full-width">
+                <label>رقم الواتساب</label>
+                <input type="tel" id="in-phone" placeholder="9665xxxxxxxx" oninput="sync()">
+            </div>
         </div>
 
-        <div class="form-group">
-            <label>السعر (ر.س)</label>
-            <input type="text" id="in-price" placeholder="مثلاً: 2,500,000" oninput="updatePreview()">
-        </div>
+        <button class="btn-generate" onclick="makeQR()">توليد كود البار (QR Code) 🚀</button>
 
-        <div class="form-group">
-            <label>وصف مختصر</label>
-            <textarea id="in-desc" rows="3" placeholder="اكتب تفاصيل العقار..." oninput="updatePreview()"></textarea>
-        </div>
-
-        <div class="form-group">
-            <label>رقم الواتساب (بدون +)</label>
-            <input type="tel" id="in-phone" placeholder="9665xxxxxxxx" oninput="updatePreview()">
-        </div>
-
-        <button class="btn-generate" onclick="generateQR()">توليد QR كود للزبون 🚀</button>
-
-        <div id="qr-area" class="qr-result">
-            <p style="font-weight: 900; margin-top: 0;">جاهز للارسال! ✅</p>
+        <div id="qr-area" class="qr-wrapper">
             <div id="qrcode"></div>
-            <p style="font-size: 12px; color: #666;">اطلب من الزبون مسح هذا الكود لمعاينة العقار</p>
-            <button onclick="window.print()" style="background:none; border:1px solid #ddd; padding:5px 10px; cursor:pointer; border-radius:5px;">طباعة الكود</button>
+            <p style="font-weight: 800; color: var(--primary); margin: 10px 0 0;">كود العقار جاهز!</p>
+            <p style="font-size: 11px; color: #64748b;">انسخ الرابط أو صور الشاشة لإرسالها للزبون</p>
         </div>
     </div>
 
-    <div class="preview-label">معاينة مباشرة لما سيراه الزبون 👇</div>
-    <div id="client-view" style="width: 100%; max-width: 400px; border: 8px solid #000; border-radius: 30px; overflow: hidden; background: white; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
-        <div style="height: 180px; background: #ddd center/cover; background-image: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500');"></div>
-        <div style="padding: 20px;">
-            <div id="p-price" style="color:var(--accent); font-size: 24px; font-weight: 900;">2,500,000 ر.س</div>
-            <h3 id="p-title" style="margin: 5px 0;">عنوان العقار</h3>
-            <p id="p-desc" style="color: #666; font-size: 13px;">وصف العقار يظهر هنا...</p>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8fafc; padding: 10px; border-radius: 10px; margin: 15px 0;">
-                <div style="text-align: center;"><div style="font-weight: 900;" id="v-count">1</div><span style="font-size: 10px;">مشاهدة</span></div>
-                <div style="text-align: center;"><div style="font-weight: 900;">0</div><span style="font-size: 10px;">مهتم</span></div>
+    <p style="color: #94a3b8; font-weight: 800; font-size: 12px; margin-bottom: 15px;">معاينة حية لما سيراه الزبون</p>
+    <div class="phone-mockup">
+        <div class="mock-screen">
+            <div id="p-img" style="height: 220px; background: #e2e8f0 center/cover;"></div>
+            <div style="padding: 20px;">
+                <div id="p-price" style="color: var(--accent); font-size: 26px; font-weight: 900;">0 ر.س</div>
+                <h3 id="p-title" style="margin: 5px 0; color: var(--primary);">اسم العقار</h3>
+                <p id="p-desc" style="color: #64748b; font-size: 14px; line-height: 1.6;">وصف العقار سيظهر هنا بالتفصيل...</p>
+                
+                <div style="background: #f8fafc; display: flex; justify-content: space-around; padding: 15px; border-radius: 15px; margin: 20px 0;">
+                    <div style="text-align:center;"><b style="display:block; font-size:18px;">124</b><span style="font-size:10px; color:#64748b;">مشاهدة</span></div>
+                    <div style="text-align:center;"><b style="display:block; font-size:18px; color:var(--success);">18</b><span style="font-size:10px; color:#64748b;">مهتم</span></div>
+                </div>
+
+                <div style="background: var(--success); color: white; text-align: center; padding: 15px; border-radius: 12px; font-weight: 900; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);">تواصل عبر واتساب</div>
             </div>
-            
-            <div style="background: var(--success); color: white; text-align: center; padding: 12px; border-radius: 10px; font-weight: 900;">تواصل عبر واتساب</div>
         </div>
     </div>
 
     <script>
-        // تحديث المعاينة لحظياً
-        function updatePreview() {
-            document.getElementById('p-title').innerText = document.getElementById('in-title').value || "عنوان العقار";
-            document.getElementById('p-price').innerText = (document.getElementById('in-price').value || "0") + " ر.س";
-            document.getElementById('p-desc').innerText = document.getElementById('in-desc').value || "وصف العقار يظهر هنا...";
+        let qrcode = null;
+
+        // وظيفة معالجة الصورة وتحميلها في المعاينة
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('p-img').style.backgroundImage = `url('${e.target.result}')`;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
         }
 
-        // توليد الـ QR كود
-        function generateQR() {
-            const qrContainer = document.getElementById("qrcode");
-            qrContainer.innerHTML = ""; // مسح القديم
+        // مزامنة البيانات لحظياً
+        function sync() {
+            document.getElementById('p-title').innerText = document.getElementById('in-title').value || "اسم العقار";
+            document.getElementById('p-price').innerText = (document.getElementById('in-price').value || "0") + " ر.س";
+            document.getElementById('p-desc').innerText = document.getElementById('in-desc').value || "وصف العقار سيظهر هنا...";
+        }
+
+        // وظيفة توليد الكود (تم إصلاحها لتكون دقيقة)
+        function makeQR() {
+            const title = document.getElementById('in-title').value;
+            const qrDiv = document.getElementById("qrcode");
             
-            // الرابط الذي سيفتحه الزبون (في الواقع سيكون رابط موقعك)
-            // سنضع هنا رابطاً تجريبياً يحتوي على بيانات العقار
-            const baseUrl = window.location.href.split('?')[0];
-            const queryParams = `?t=${encodeURIComponent(document.getElementById('in-title').value)}&p=${document.getElementById('in-price').value}`;
+            if(!title) {
+                alert("يرجى إدخال عنوان العقار أولاً");
+                return;
+            }
+
+            // مسح الكود القديم إن وجد
+            qrDiv.innerHTML = "";
             
-            new QRCode(qrContainer, {
-                text: baseUrl + queryParams,
+            // الرابط (هنا نضع الرابط الذي سيفتحه الزبون)
+            const dataToEncode = window.location.href + "?id=" + Date.now();
+
+            qrcode = new QRCode(qrDiv, {
+                text: dataToEncode,
                 width: 180,
                 height: 180,
-                colorDark : "#1e293b",
+                colorDark : "#0f172a",
                 colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.H
             });
 
             document.getElementById('qr-area').style.display = 'block';
-            window.scrollTo(0, document.body.scrollHeight);
         }
-
-        // محاكاة عداد المشاهدات
-        let count = Math.floor(Math.random() * 50) + 1;
-        document.getElementById('v-count').innerText = count;
     </script>
 </body>
 </html>
