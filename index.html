@@ -2,71 +2,102 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>نظام الطاولة الذكية | Smart Menu</title>
+    <title>منيو QR الاحترافي</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { font-family: 'Tajawal', sans-serif; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; padding: 40px; }
-        .setup-panel { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 30px; width: 350px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; background: #e67e22; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        body { font-family: 'Tajawal', sans-serif; background: #f8f9fa; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .config-box { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 380px; margin-bottom: 30px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1.5px solid #eee; border-radius: 10px; outline: none; transition: 0.3s; }
+        input:focus { border-color: #d35400; }
+        button { width: 100%; background: #d35400; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 900; cursor: pointer; font-size: 16px; margin-top: 10px; }
         
-        /* تصميم الملصق الذي سيطبع */
-        .sticker { 
-            background: white; width: 300px; padding: 20px; border-radius: 20px; 
-            text-align: center; border: 3px solid #e67e22; display: none;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        /* شكل الملصق للطباعة */
+        #printable-sticker { 
+            background: white; width: 320px; padding: 30px; border-radius: 25px; 
+            text-align: center; border: 4px solid #d35400; display: none;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15); position: relative;
         }
-        .restaurant-name { font-size: 22px; font-weight: 900; color: #333; margin-bottom: 5px; }
-        .table-number { background: #e67e22; color: white; display: inline-block; padding: 5px 20px; border-radius: 50px; font-size: 14px; margin-bottom: 15px; }
-        #qrcode { display: flex; justify-content: center; margin: 15px 0; }
-        .instruction { font-size: 14px; color: #666; font-weight: bold; }
+        .rest-title { font-size: 24px; font-weight: 900; color: #2c3e50; margin-bottom: 5px; }
+        .table-badge { background: #d35400; color: white; padding: 4px 15px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; display: inline-block; }
+        #qrcode { display: flex; justify-content: center; margin: 20px 0; }
+        .footer-text { font-size: 12px; color: #7f8c8d; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="setup-panel">
-    <h3>إعداد ملصق الطاولة 🍽️</h3>
-    <input type="text" id="restName" placeholder="اسم المطعم">
+<div class="config-box">
+    <h2 style="text-align:center; color:#d35400; margin-top:0;">إعداد المنيو الذكي 📋</h2>
+    <input type="text" id="restName" placeholder="اسم المطعم (مثلاً: شاورما السلطان)">
     <input type="number" id="tableNum" placeholder="رقم الطاولة">
     <input type="tel" id="waPhone" placeholder="رقم واتساب الطلبات (966...)">
-    <button onclick="generateSticker()">إنشاء ملصق الطاولة ✨</button>
+    <input type="url" id="pdfLink" placeholder="رابط المنيو PDF (من جوجل درايف أو غيره)">
+    <button onclick="generateSmartMenu()">توليد ملصق الطاولة 🚀</button>
 </div>
 
-<div id="sticker-area" class="sticker">
-    <div class="restaurant-name" id="display-name">اسم المطعم</div>
-    <div class="table-number">طاولة رقم <span id="display-table">0</span></div>
+<div id="printable-sticker">
+    <div class="rest-title" id="out-name">اسم المطعم</div>
+    <div class="table-badge">طاولة رقم <span id="out-table">0</span></div>
     <div id="qrcode"></div>
-    <p class="instruction">امسح الكود لطلب الخدمة فوراُ 📱</p>
-    <div style="font-size: 10px; color: #ccc; margin-top: 10px;">Powered by Qrestige</div>
+    <p style="font-weight: 900; color: #2c3e50; margin: 0;">امسح للطلب أو لمشاهدة المنيو</p>
+    <p class="footer-text">صنع بذكاء عبر Qrestige</p>
 </div>
 
 <script>
-function generateSticker() {
+function generateSmartMenu() {
     const name = document.getElementById('restName').value;
     const table = document.getElementById('tableNum').value;
     const phone = document.getElementById('waPhone').value;
+    const pdf = document.getElementById('pdfLink').value;
 
-    if(!name || !table || !phone) return alert("فضلاً أكمل البيانات");
+    if(!name || !table || !phone || !pdf) return alert("أرجوك املأ جميع الخانات لضمان عمل النظام");
 
-    document.getElementById('display-name').innerText = name;
-    document.getElementById('display-table').innerText = table;
+    // تحديث العرض
+    document.getElementById('out-name').innerText = name;
+    document.getElementById('out-table').innerText = table;
 
-    // الرابط الذي سيفتحه الزبون
-    const waLink = `https://wa.me/${phone}?text=${encodeURIComponent("أهلاً " + name + "، أنا على الطاولة رقم (" + table + ") وأود الطلب من فضلك.")}`;
+    // بناء "صفحة الهبوط المدمجة" داخل الرابط
+    const waLink = `https://wa.me/${phone}?text=${encodeURIComponent("طلب من طاولة " + table)}`;
+    
+    // تصميم الصفحة التي ستظهر للزبون عند المسح
+    let miniSite = `
+    <!DOCTYPE html>
+    <html dir="rtl">
+    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+        body{background:#f4f4f4;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
+        .card{background:#fff;padding:30px;border-radius:25px;text-align:center;width:85%;box-shadow:0 10px 20px rgba(0,0,0,0.1)}
+        h1{color:#333;font-size:22px}
+        .btn{display:block;padding:18px;margin:15px 0;text-decoration:none;border-radius:15px;font-weight:bold;font-size:18px;transition:0.2s}
+        .btn-pdf{background:#d35400;color:#fff}
+        .btn-wa{background:#27ae60;color:#fff}
+    </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>أهلاً بك في ${name} ✨</h1>
+            <p>الطاولة رقم: ${table}</p>
+            <a class="btn btn-pdf" href="${pdf}">📖 فتح المنيو (PDF)</a>
+            <a class="btn btn-wa" href="${waLink}">💬 اطلب عبر واتساب</a>
+        </div>
+    </body>
+    </html>`;
 
+    // تنظيف الكود وضغطه
+    miniSite = miniSite.replace(/\s+/g, ' ').trim();
+    const dataURI = "data:text/html;charset=utf-8," + encodeURIComponent(miniSite);
+
+    // توليد الـ QR
     const qrDiv = document.getElementById("qrcode");
     qrDiv.innerHTML = "";
     new QRCode(qrDiv, {
-        text: waLink,
+        text: dataURI,
         width: 180,
         height: 180,
-        colorDark : "#000000",
-        colorLight : "#ffffff",
-        correctLevel : QRCode.CorrectLevel.H
+        correctLevel: QRCode.CorrectLevel.L
     });
 
-    document.getElementById('sticker-area').style.display = 'block';
+    document.getElementById('printable-sticker').style.display = 'block';
 }
 </script>
 
