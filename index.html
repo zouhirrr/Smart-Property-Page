@@ -3,132 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مولد الأوامر الذكي | Qrestige</title>
+    <title>مصيدة الزبائن الذكية 🎣</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { font-family: 'Tajawal', sans-serif; background: #111827; color: white; display: flex; justify-content: center; padding: 20px; min-height: 100vh; align-items: center; margin: 0; }
-        .container { background: #1f2937; padding: 30px; border-radius: 24px; width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid #374151; }
+        body { font-family: 'Tajawal', sans-serif; background: #222; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .trap-box { background: #333; padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 2px solid #444; }
         
-        h2 { text-align: center; color: #f59e0b; margin-top: 0; }
-        
-        /* أزرار التبديل */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: #374151; padding: 5px; border-radius: 12px; }
-        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; font-size: 12px; font-weight: 700; color: #9ca3af; transition: 0.3s; }
-        .tab.active { background: #f59e0b; color: #000; }
+        h2 { color: #4ade80; margin-top: 0; font-size: 24px; }
+        p { color: #aaa; font-size: 14px; margin-bottom: 20px; }
 
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 13px; margin-bottom: 5px; color: #d1d5db; }
-        input, textarea { width: 100%; padding: 12px; background: #111827; border: 1px solid #4b5563; color: white; border-radius: 10px; outline: none; box-sizing: border-box; }
-        input:focus { border-color: #f59e0b; }
+        .toggle-container { background: #111; padding: 5px; border-radius: 50px; display: flex; margin-bottom: 20px; position: relative; }
+        .toggle-btn { flex: 1; padding: 10px; border-radius: 50px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 14px; z-index: 2; }
+        .active { background: #4ade80; color: #000; box-shadow: 0 0 15px rgba(74, 222, 128, 0.4); }
 
-        .btn-gen { background: #f59e0b; color: #000; width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; margin-top: 10px; }
-        .btn-gen:hover { background: #d97706; }
+        input, textarea { width: 100%; background: #222; border: 1px solid #555; padding: 15px; color: white; border-radius: 10px; margin-bottom: 10px; outline: none; box-sizing: border-box; }
+        input:focus { border-color: #4ade80; }
 
-        #qr-area { display: none; text-align: center; margin-top: 25px; background: white; padding: 20px; border-radius: 15px; }
-        .hidden { display: none; }
+        button { width: 100%; background: #4ade80; color: #000; padding: 15px; border: none; border-radius: 10px; font-weight: 900; font-size: 18px; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #22c55e; }
+
+        #qr-result { margin-top: 30px; display: none; background: white; padding: 15px; border-radius: 15px; }
+        #qrcode { display: flex; justify-content: center; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>⚡ مولد الأوامر المباشرة</h2>
-    
-    <div class="tabs">
-        <div class="tab active" onclick="setMode('whatsapp')">واتساب 💬</div>
-        <div class="tab" onclick="setMode('maps')">خريطة 📍</div>
-        <div class="tab" onclick="setMode('call')">اتصال 📞</div>
-        <div class="tab" onclick="setMode('wifi')">واي فاي 📶</div>
+<div class="trap-box">
+    <h2>🎣 مصيدة الزبائن</h2>
+    <p>اجعل الزبون يراسلك بضغطة زر واحدة</p>
+
+    <div class="toggle-container">
+        <div class="toggle-btn active" onclick="setType('wa')" id="btn-wa">واتساب (للعرب)</div>
+        <div class="toggle-btn" onclick="setType('sms')" id="btn-sms">SMS (لأمريكا)</div>
     </div>
 
-    <div id="form-whatsapp" class="input-group">
-        <label>رقمك (مع مفتاح الدولة بدون +)</label>
-        <input type="number" id="wa-phone" placeholder="9665xxxxxxxx">
-        <label>الرسالة الجاهزة للزبون</label>
-        <textarea id="wa-text" rows="2" placeholder="أنا مهتم بهذا العقار..."></textarea>
-    </div>
+    <input type="tel" id="myPhone" placeholder="رقم هاتفك (مع مفتاح الدولة 966...)">
+    <textarea id="preMessage" rows="3" placeholder="الرسالة التي ستظهر في جوال الزبون (مثلاً: أريد تفاصيل العرض رقم 5)"></textarea>
 
-    <div id="form-maps" class="input-group hidden">
-        <label>رابط الموقع من جوجل ماب (أو الإحداثيات)</label>
-        <input type="text" id="map-link" placeholder="https://maps.google.com/...">
-        <p style="font-size:10px; color:#9ca3af;">نصيحة: افتح جوجل ماب، اضغط مشاركة، انسخ الرابط وضعه هنا.</p>
-    </div>
+    <button onclick="generateTrap()">إنشاء المصيدة 🚀</button>
 
-    <div id="form-call" class="input-group hidden">
-        <label>رقم الهاتف للاتصال المباشر</label>
-        <input type="tel" id="call-phone" placeholder="05xxxxxxxx">
-    </div>
-
-    <div id="form-wifi" class="input-group hidden">
-        <label>اسم الشبكة (SSID)</label>
-        <input type="text" id="wifi-ssid">
-        <label>كلمة المرور</label>
-        <input type="text" id="wifi-pass">
-        <label>نوع التشفير</label>
-        <select id="wifi-type" style="width:100%; padding:10px; border-radius:10px; background:#111827; color:white; border:1px solid #4b5563;">
-            <option value="WPA">WPA/WPA2</option>
-            <option value="WEP">WEP</option>
-            <option value="nopass">مفتوحة</option>
-        </select>
-    </div>
-
-    <button class="btn-gen" onclick="generateActionQR()">توليد الكود الآن 🚀</button>
-
-    <div id="qr-area">
-        <div id="qr-image"></div>
-        <p style="color:black; font-weight:bold; margin-top:10px;">امسح الكود لتنفيذ الأمر فوراً!</p>
+    <div id="qr-result">
+        <div id="qrcode"></div>
+        <p style="color: #333; margin: 10px 0 0; font-weight: bold; font-size: 12px;">امسح لتجربة السحر ✨</p>
     </div>
 </div>
 
 <script>
-    let currentMode = 'whatsapp';
+    let currentType = 'wa';
 
-    function setMode(mode) {
-        currentMode = mode;
-        // تحديث الأزرار
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        event.target.classList.add('active');
-
-        // إخفاء وإظهار الحقول
-        document.querySelectorAll('.input-group').forEach(g => g.classList.add('hidden'));
-        document.getElementById('form-' + mode).classList.remove('hidden');
-        document.getElementById('qr-area').style.display = 'none';
+    function setType(type) {
+        currentType = type;
+        document.getElementById('btn-wa').classList.toggle('active', type === 'wa');
+        document.getElementById('btn-sms').classList.toggle('active', type === 'sms');
+        
+        // تغيير التلميح حسب النوع
+        const input = document.getElementById('myPhone');
+        if(type === 'wa') input.placeholder = "رقم واتساب (مثال: 9665...)";
+        else input.placeholder = "رقم جوال (مثال: +1202...)";
     }
 
-    function generateActionQR() {
-        let finalData = "";
+    function generateTrap() {
+        const phone = document.getElementById('myPhone').value.replace('+', ''); // تنظيف الرقم
+        const msg = document.getElementById('preMessage').value;
+        const qrDiv = document.getElementById("qrcode");
 
-        if (currentMode === 'whatsapp') {
-            const ph = document.getElementById('wa-phone').value;
-            const txt = document.getElementById('wa-text').value;
-            if(!ph) return alert("أدخل الرقم");
-            // رابط واتساب العالمي
-            finalData = `https://wa.me/${ph}?text=${encodeURIComponent(txt)}`;
-        } 
-        else if (currentMode === 'maps') {
-            const loc = document.getElementById('map-link').value;
-            if(!loc) return alert("أدخل الرابط");
-            finalData = loc;
-        } 
-        else if (currentMode === 'call') {
-            const ph = document.getElementById('call-phone').value;
-            if(!ph) return alert("أدخل الرقم");
-            // بروتوكول الاتصال
-            finalData = `tel:${ph}`;
-        }
-        else if (currentMode === 'wifi') {
-            const ssid = document.getElementById('wifi-ssid').value;
-            const pass = document.getElementById('wifi-pass').value;
-            const type = document.getElementById('wifi-type').value;
-            if(!ssid) return alert("أدخل اسم الشبكة");
-            // بروتوكول الواي فاي
-            finalData = `WIFI:T:${type};S:${ssid};P:${pass};;`;
+        if(!phone || !msg) return alert("البيانات ناقصة يا صديقي!");
+
+        let finalLink = "";
+
+        if(currentType === 'wa') {
+            // رابط واتساب مباشر
+            finalLink = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+        } else {
+            // رابط SMS ذكي يعمل على آيفون وأندرويد
+            // الرموز الغريبة هنا لضمان عملها على النظامين
+            const ua = navigator.userAgent.toLowerCase();
+            if(ua.indexOf('iphone') > -1 || ua.indexOf('ipad') > -1) {
+                 finalLink = `sms:${phone}&body=${encodeURIComponent(msg)}`;
+            } else {
+                 finalLink = `sms:${phone}?body=${encodeURIComponent(msg)}`;
+            }
         }
 
-        // استخدام Google Chart API لضمان العمل 100% بدون أخطاء مكتبات
-        const qrUrl = `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(finalData)}&choe=UTF-8`;
-        
-        document.getElementById('qr-image').innerHTML = `<img src="${qrUrl}" style="width:100%; border-radius:10px;">`;
-        document.getElementById('qr-area').style.display = 'block';
+        // تنظيف وتوليد
+        qrDiv.innerHTML = "";
+        new QRCode(qrDiv, {
+            text: finalLink,
+            width: 180,
+            height: 180,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        document.getElementById('qr-result').style.display = 'block';
     }
 </script>
 
