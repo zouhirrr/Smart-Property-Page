@@ -2,63 +2,51 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>مولد كود طلبات الطاولة</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
+    <title>مولد كود الطلب المباشر</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { font-family: 'Tajawal', sans-serif; background: #fdfdfd; display: flex; justify-content: center; padding: 40px; color: #333; }
-        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 400px; border: 1px solid #eee; }
-        h2 { color: #2ecc71; text-align: center; margin-bottom: 25px; }
-        label { display: block; font-size: 14px; margin-bottom: 8px; font-weight: bold; }
-        input { width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #f1f1f1; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px; }
-        input:focus { border-color: #2ecc71; }
-        button { width: 100%; background: #2ecc71; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 18px; transition: 0.3s; }
-        button:hover { background: #27ae60; }
-        
-        #result { display: none; margin-top: 30px; text-align: center; background: #f9f9f9; padding: 20px; border-radius: 15px; border: 2px dashed #ddd; }
-        #qrcode { display: flex; justify-content: center; margin-bottom: 15px; }
-        .print-btn { background: #34495e; margin-top: 15px; font-size: 14px; }
+        body { font-family: 'Tajawal', sans-serif; background: #f4f4f9; display: flex; justify-content: center; padding: 50px; }
+        .box { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h2 { color: #25d366; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; text-align: center; font-size: 16px; }
+        button { width: 100%; background: #25d366; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px; margin-top: 10px; }
+        #qrcode { margin-top: 30px; display: flex; justify-content: center; flex-direction: column; align-items: center; }
+        .desc { font-size: 12px; color: #666; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>طلب الطاولة السريع ⚡</h2>
+<div class="box">
+    <h2>طلب الواتساب السريع 🟢</h2>
+    <p style="font-size: 14px; color: #444;">أدخل رقم صاحب المطعم لتوليد الكود</p>
     
-    <label>رقم واتساب المطعم (مثال: 9665xxxxxxxx)</label>
     <input type="tel" id="phone" placeholder="966xxxxxxxx">
+    
+    <button onclick="generateQR()">توليد كود الطاولات 🚀</button>
 
-    <label>رقم الطاولة</label>
-    <input type="number" id="table" placeholder="مثلاً: 12">
-
-    <button onclick="generateOrderQR()">توليد الكود للمطعم 🚀</button>
-
-    <div id="result">
-        <div id="qrcode"></div>
-        <p style="font-weight: bold; margin: 0;">طاولة رقم <span id="lbl-table"></span></p>
-        <p style="font-size: 12px; color: #666;">عند المسح، سيفتح واتساب برسالة جاهزة</p>
-        <button class="print-btn" onclick="window.print()">طباعة الكود</button>
+    <div id="qrcode">
+        <div id="canvas"></div>
+        <div id="info" class="desc"></div>
     </div>
 </div>
 
 <script>
-function generateOrderQR() {
+function generateQR() {
     const phone = document.getElementById('phone').value;
-    const table = document.getElementById('table').value;
+    if(!phone) return alert("أدخل رقم الهاتف أولاً");
 
-    if(!phone || !table) return alert("أدخل رقم الهاتف ورقم الطاولة");
-
-    // الرسالة التي ستصل لصاحب المطعم
-    const message = `أهلاً، أنا على الطاولة رقم (${table})، أريد طلب الآتي:\n- `;
+    // الرسالة القالب التي ستظهر للزبون
+    const text = "مرحباً، أنا على طاولة رقم: \nوأطلب الآتي: \n- ";
     
-    // رابط واتساب المباشر
-    const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    // الرابط السحري للواتساب
+    const link = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
 
-    // توليد الـ QR
-    const qrDiv = document.getElementById("qrcode");
-    qrDiv.innerHTML = "";
-    new QRCode(qrDiv, {
-        text: waLink,
+    const canvas = document.getElementById("canvas");
+    canvas.innerHTML = ""; // مسح الكود القديم
+    
+    new QRCode(canvas, {
+        text: link,
         width: 200,
         height: 200,
         colorDark : "#000000",
@@ -66,8 +54,7 @@ function generateOrderQR() {
         correctLevel : QRCode.CorrectLevel.H
     });
 
-    document.getElementById('lbl-table').innerText = table;
-    document.getElementById('result').style.display = 'block';
+    document.getElementById("info").innerHTML = "<b>تم التوليد بنجاح!</b><br>اطبع هذا الكود وضعه على جميع الطاولات.";
 }
 </script>
 
