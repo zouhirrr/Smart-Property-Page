@@ -2,89 +2,72 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>مولد كود المطاعم الاحترافي</title>
+    <title>مولد كود طلبات الطاولة</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { font-family: 'Tajawal', sans-serif; background: #f9fafb; display: flex; justify-content: center; padding: 40px; }
-        .tool-box { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        h2 { color: #e67e22; margin-bottom: 25px; text-align: center; }
-        label { display: block; font-size: 13px; margin-bottom: 5px; color: #555; font-weight: bold; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; outline: none; transition: 0.3s; }
-        input:focus { border-color: #e67e22; }
-        button { width: 100%; background: #e67e22; color: white; border: none; padding: 15px; border-radius: 10px; font-weight: 900; cursor: pointer; font-size: 16px; }
-        #qrcode-result { margin-top: 30px; text-align: center; display: none; border-top: 2px solid #f9fafb; padding-top: 20px; }
-        #qrcode { display: flex; justify-content: center; margin-bottom: 10px; }
+        body { font-family: 'Tajawal', sans-serif; background: #fdfdfd; display: flex; justify-content: center; padding: 40px; color: #333; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 400px; border: 1px solid #eee; }
+        h2 { color: #2ecc71; text-align: center; margin-bottom: 25px; }
+        label { display: block; font-size: 14px; margin-bottom: 8px; font-weight: bold; }
+        input { width: 100%; padding: 12px; margin-bottom: 20px; border: 2px solid #f1f1f1; border-radius: 12px; box-sizing: border-box; outline: none; font-size: 16px; }
+        input:focus { border-color: #2ecc71; }
+        button { width: 100%; background: #2ecc71; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 18px; transition: 0.3s; }
+        button:hover { background: #27ae60; }
+        
+        #result { display: none; margin-top: 30px; text-align: center; background: #f9f9f9; padding: 20px; border-radius: 15px; border: 2px dashed #ddd; }
+        #qrcode { display: flex; justify-content: center; margin-bottom: 15px; }
+        .print-btn { background: #34495e; margin-top: 15px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div class="tool-box">
-    <h2>مولد الأكواد الذكية 🍽️</h2>
+<div class="card">
+    <h2>طلب الطاولة السريع ⚡</h2>
     
-    <label>رابط المنيو (الذي قدمه المطعم)</label>
-    <input type="url" id="menuUrl" placeholder="https://example.com/menu.pdf">
-
-    <label>رقم واتساب الطلبات</label>
-    <input type="tel" id="waPhone" placeholder="9665xxxxxxxx">
+    <label>رقم واتساب المطعم (مثال: 9665xxxxxxxx)</label>
+    <input type="tel" id="phone" placeholder="966xxxxxxxx">
 
     <label>رقم الطاولة</label>
-    <input type="number" id="tableNum" placeholder="مثلاً: 5">
+    <input type="number" id="table" placeholder="مثلاً: 12">
 
-    <button onclick="generateActionQR()">توليد الكود النهائي 🚀</button>
+    <button onclick="generateOrderQR()">توليد الكود للمطعم 🚀</button>
 
-    <div id="qrcode-result">
+    <div id="result">
         <div id="qrcode"></div>
-        <p style="font-size: 12px; color: #777;">جاهز للطباعة واللصق على الطاولة</p>
-        <button onclick="window.print()" style="background:#34495e; margin-top:10px; font-size:13px;">حفظ كملف PDF للطباعة</button>
+        <p style="font-weight: bold; margin: 0;">طاولة رقم <span id="lbl-table"></span></p>
+        <p style="font-size: 12px; color: #666;">عند المسح، سيفتح واتساب برسالة جاهزة</p>
+        <button class="print-btn" onclick="window.print()">طباعة الكود</button>
     </div>
 </div>
 
 <script>
-function generateActionQR() {
-    const menu = document.getElementById('menuUrl').value;
-    const phone = document.getElementById('waPhone').value;
-    const table = document.getElementById('tableNum').value;
+function generateOrderQR() {
+    const phone = document.getElementById('phone').value;
+    const table = document.getElementById('table').value;
 
-    if(!menu || !phone || !table) return alert("فضلاً أدخل جميع البيانات");
+    if(!phone || !table) return alert("أدخل رقم الهاتف ورقم الطاولة");
 
-    const waLink = `https://wa.me/${phone}?text=${encodeURIComponent("طلب من طاولة رقم: " + table)}`;
+    // الرسالة التي ستصل لصاحب المطعم
+    const message = `أهلاً، أنا على الطاولة رقم (${table})، أريد طلب الآتي:\n- `;
     
-    // تصميم الصفحة المصغرة التي ستظهر للزبون عند المسح
-    // يتم ضغطها بالكامل داخل الرابط
-    let landingPage = `
-    <!DOCTYPE html>
-    <html dir="rtl">
-    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-    <style>
-        body{background:#f0f2f5;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
-        .c{background:#fff;padding:30px;border-radius:20px;text-align:center;width:80%;box-shadow:0 10px 20px rgba(0,0,0,0.05)}
-        .b{display:block;padding:15px;margin:10px 0;text-decoration:none;border-radius:10px;font-weight:bold;color:#fff}
-        .m{background:#e67e22}.w{background:#27ae60}
-    </style>
-    </head>
-    <body>
-        <div class="c">
-            <h2 style="margin-top:0">طاولة رقم ${table}</h2>
-            <a class="b m" href="${menu}">📖 عرض المنيو</a>
-            <a class="b w" href="${waLink}">💬 اطلب الآن</a>
-        </div>
-    </body>
-    </html>`;
+    // رابط واتساب المباشر
+    const waLink = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
-    landingPage = landingPage.replace(/\s+/g, ' ').trim();
-    const dataURI = "data:text/html;charset=utf-8," + encodeURIComponent(landingPage);
-
+    // توليد الـ QR
     const qrDiv = document.getElementById("qrcode");
     qrDiv.innerHTML = "";
     new QRCode(qrDiv, {
-        text: dataURI,
+        text: waLink,
         width: 200,
         height: 200,
-        correctLevel: QRCode.CorrectLevel.L
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
     });
 
-    document.getElementById('qrcode-result').style.display = 'block';
+    document.getElementById('lbl-table').innerText = table;
+    document.getElementById('result').style.display = 'block';
 }
 </script>
 
