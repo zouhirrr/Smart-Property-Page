@@ -3,102 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مصيدة الزبائن الذكية 🎣</title>
+    <title>مولد الموقع المحمول | Serverless QR</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { font-family: 'Tajawal', sans-serif; background: #222; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .trap-box { background: #333; padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 2px solid #444; }
+        body { font-family: 'Tajawal', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .editor { background: #1e293b; padding: 30px; border-radius: 20px; width: 100%; max-width: 500px; border: 1px solid #334155; }
         
-        h2 { color: #4ade80; margin-top: 0; font-size: 24px; }
-        p { color: #aaa; font-size: 14px; margin-bottom: 20px; }
+        h2 { color: #38bdf8; margin-top: 0; text-align: center; }
+        .note { font-size: 12px; color: #94a3b8; text-align: center; margin-bottom: 20px; }
 
-        .toggle-container { background: #111; padding: 5px; border-radius: 50px; display: flex; margin-bottom: 20px; position: relative; }
-        .toggle-btn { flex: 1; padding: 10px; border-radius: 50px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 14px; z-index: 2; }
-        .active { background: #4ade80; color: #000; box-shadow: 0 0 15px rgba(74, 222, 128, 0.4); }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; outline: none; }
+        
+        .btn-add { background: #38bdf8; color: #000; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 900; cursor: pointer; margin-top: 15px; font-size: 16px; }
+        .btn-add:hover { background: #0ea5e9; }
 
-        input, textarea { width: 100%; background: #222; border: 1px solid #555; padding: 15px; color: white; border-radius: 10px; margin-bottom: 10px; outline: none; box-sizing: border-box; }
-        input:focus { border-color: #4ade80; }
-
-        button { width: 100%; background: #4ade80; color: #000; padding: 15px; border: none; border-radius: 10px; font-weight: 900; font-size: 18px; cursor: pointer; margin-top: 10px; }
-        button:hover { background: #22c55e; }
-
-        #qr-result { margin-top: 30px; display: none; background: white; padding: 15px; border-radius: 15px; }
-        #qrcode { display: flex; justify-content: center; }
+        #qr-container { display: none; margin-top: 30px; background: white; padding: 20px; border-radius: 15px; text-align: center; }
+        #qr-code { display: flex; justify-content: center; }
     </style>
 </head>
 <body>
 
-<div class="trap-box">
-    <h2>🎣 مصيدة الزبائن</h2>
-    <p>اجعل الزبون يراسلك بضغطة زر واحدة</p>
+<div class="editor">
+    <h2>⚡ موقعك الكامل داخل الكود</h2>
+    <p class="note">هذا النظام يضغط كود الموقع HTML داخل الـ QR مباشرة!</p>
 
-    <div class="toggle-container">
-        <div class="toggle-btn active" onclick="setType('wa')" id="btn-wa">واتساب (للعرب)</div>
-        <div class="toggle-btn" onclick="setType('sms')" id="btn-sms">SMS (لأمريكا)</div>
-    </div>
+    <label>اسم براندك / شركتك</label>
+    <input type="text" id="siteName" placeholder="مثلاً: عقارات النخبة">
 
-    <input type="tel" id="myPhone" placeholder="رقم هاتفك (مع مفتاح الدولة 966...)">
-    <textarea id="preMessage" rows="3" placeholder="الرسالة التي ستظهر في جوال الزبون (مثلاً: أريد تفاصيل العرض رقم 5)"></textarea>
+    <label>لون الخلفية المفضل</label>
+    <select id="bgColor">
+        <option value="#000000">أسود فخم</option>
+        <option value="#1a237e">أزرق ملكي</option>
+        <option value="#b91c1c">أحمر جريء</option>
+        <option value="#064e3b">أخضر غامق</option>
+    </select>
 
-    <button onclick="generateTrap()">إنشاء المصيدة 🚀</button>
+    <label>رابط واتساب</label>
+    <input type="text" id="link1" placeholder="https://wa.me/966...">
+    
+    <label>رابط الموقع / المتجر</label>
+    <input type="text" id="link2" placeholder="https://...">
 
-    <div id="qr-result">
-        <div id="qrcode"></div>
-        <p style="color: #333; margin: 10px 0 0; font-weight: bold; font-size: 12px;">امسح لتجربة السحر ✨</p>
+    <label>رابط اللوكيشن (جوجل ماب)</label>
+    <input type="text" id="link3" placeholder="https://maps.google...">
+
+    <button class="btn-add" onclick="generateMicroSite()">اصنع الموقع واضغطه في QR 🚀</button>
+
+    <div id="qr-container">
+        <div id="qr-code"></div>
+        <p style="color:black; font-weight:bold; margin-top:10px;">امسح الكود وشاهد السحر!</p>
+        <p style="color:#666; font-size:11px;">ملاحظة: الكود كثيف لأنه يحتوي على الموقع كاملاً</p>
     </div>
 </div>
 
 <script>
-    let currentType = 'wa';
+function generateMicroSite() {
+    const name = document.getElementById('siteName').value || "موقعي الشخصي";
+    const bg = document.getElementById('bgColor').value;
+    const l1 = document.getElementById('link1').value;
+    const l2 = document.getElementById('link2').value;
+    const l3 = document.getElementById('link3').value;
 
-    function setType(type) {
-        currentType = type;
-        document.getElementById('btn-wa').classList.toggle('active', type === 'wa');
-        document.getElementById('btn-sms').classList.toggle('active', type === 'sms');
-        
-        // تغيير التلميح حسب النوع
-        const input = document.getElementById('myPhone');
-        if(type === 'wa') input.placeholder = "رقم واتساب (مثال: 9665...)";
-        else input.placeholder = "رقم جوال (مثال: +1202...)";
+    // هنا السحر: نحن نكتب كود HTML صغير جداً (Minified)
+    // ونستخدم Emoji كأيقونات لتوفير المساحة
+    let htmlContent = `
+    <!DOCTYPE html>
+    <html dir="rtl">
+    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>body{background:${bg};color:#fff;font-family:sans-serif;text-align:center;padding:40px 20px;display:flex;flex-direction:column;justify-content:center;min-height:90vh}h1{margin-bottom:30px;font-size:28px}.btn{background:#fff;color:#000;display:block;padding:15px;margin:10px 0;text-decoration:none;border-radius:50px;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(0,0,0,0.2)}.btn:hover{transform:scale(1.02)}</style>
+    </head>
+    <body>
+        <h1>${name} ✨</h1>
+        ${l1 ? `<a class="btn" href="${l1}">💬 تواصل واتساب</a>` : ''}
+        ${l2 ? `<a class="btn" href="${l2}">🌐 زيارة الموقع</a>` : ''}
+        ${l3 ? `<a class="btn" href="${l3}">📍 الموقع الجغرافي</a>` : ''}
+        <p style="margin-top:30px;font-size:12px;opacity:0.6">تم الحفظ عبر Qrestige</p>
+    </body>
+    </html>
+    `;
+
+    // ضغط الكود وإزالة المسافات الزائدة لتقليل حجم الـ QR
+    htmlContent = htmlContent.replace(/\s+/g, ' ').trim();
+
+    // تحويل الكود إلى صيغة Data URI التي تفهمها المتصفحات
+    const dataURI = "data:text/html;charset=utf-8," + encodeURIComponent(htmlContent);
+
+    // التحقق من الطول (QR Code له سعة محددة)
+    if (dataURI.length > 2500) {
+        alert("البيانات كثيرة جداً! حاول تقليل الروابط.");
+        return;
     }
 
-    function generateTrap() {
-        const phone = document.getElementById('myPhone').value.replace('+', ''); // تنظيف الرقم
-        const msg = document.getElementById('preMessage').value;
-        const qrDiv = document.getElementById("qrcode");
+    const qrDiv = document.getElementById("qr-code");
+    qrDiv.innerHTML = "";
 
-        if(!phone || !msg) return alert("البيانات ناقصة يا صديقي!");
+    new QRCode(qrDiv, {
+        text: dataURI,
+        width: 250,
+        height: 250,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.L // L allows for more data density
+    });
 
-        let finalLink = "";
-
-        if(currentType === 'wa') {
-            // رابط واتساب مباشر
-            finalLink = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-        } else {
-            // رابط SMS ذكي يعمل على آيفون وأندرويد
-            // الرموز الغريبة هنا لضمان عملها على النظامين
-            const ua = navigator.userAgent.toLowerCase();
-            if(ua.indexOf('iphone') > -1 || ua.indexOf('ipad') > -1) {
-                 finalLink = `sms:${phone}&body=${encodeURIComponent(msg)}`;
-            } else {
-                 finalLink = `sms:${phone}?body=${encodeURIComponent(msg)}`;
-            }
-        }
-
-        // تنظيف وتوليد
-        qrDiv.innerHTML = "";
-        new QRCode(qrDiv, {
-            text: finalLink,
-            width: 180,
-            height: 180,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-        });
-
-        document.getElementById('qr-result').style.display = 'block';
-    }
+    document.getElementById('qr-container').style.display = 'block';
+}
 </script>
 
 </body>
