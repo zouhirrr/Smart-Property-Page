@@ -3,163 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qrestige Pro | المحرك المستقل</title>
+    <title>لوحة تحكم المعرض العقاري</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        :root { --dark: #0f172a; --gold: #f59e0b; --green: #10b981; }
+        :root { --main: #1e293b; --gold: #f59e0b; --bg: #f8fafc; }
         * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        body { background: #f1f5f9; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        body { background: var(--bg); margin: 0; padding: 20px; color: var(--main); }
 
-        .app-container { 
-            background: white; width: 100%; max-width: 900px; padding: 30px; 
-            border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05);
-            display: grid; grid-template-columns: 1fr 350px; gap: 30px;
-        }
+        .app-grid { display: grid; grid-template-columns: 350px 1fr; gap: 20px; max-width: 1200px; margin: auto; }
 
-        .inputs-area { display: flex; flex-direction: column; gap: 15px; }
-        .preview-area { background: #1e293b; padding: 15px; border-radius: 45px; border: 10px solid #0f172a; height: 650px; position: sticky; top: 20px; }
-        
-        .field { display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 13px; font-weight: 900; color: #475569; }
-        input, textarea { padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; transition: 0.3s; }
+        /* لوحة التحكم (إضافة العروض) */
+        .admin-sidebar { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); height: fit-content; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 12px; font-weight: 900; margin-bottom: 5px; color: #64748b; }
+        input, textarea { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 10px; outline: none; }
         input:focus { border-color: var(--gold); }
+        
+        .btn-add { width: 100%; background: var(--main); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 900; cursor: pointer; margin-top: 10px; }
+        
+        /* معرض العروض (الموقع العام) */
+        .gallery-area { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .gallery-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px; }
+        
+        .properties-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .prop-card { background: white; border: 1px solid #eee; border-radius: 15px; overflow: hidden; transition: 0.3s; }
+        .prop-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .prop-img { height: 150px; background: #ddd center/cover; }
+        .prop-info { padding: 15px; }
+        
+        /* منطقة الـ QR كود */
+        .qr-section { text-align: center; background: #fffbeb; padding: 20px; border-radius: 15px; border: 2px dashed var(--gold); margin-top: 20px; }
+        #qrcode { display: flex; justify-content: center; margin: 15px 0; }
 
-        .main-btn { 
-            background: var(--dark); color: white; border: none; padding: 18px; 
-            border-radius: 15px; font-weight: 900; cursor: pointer; font-size: 16px;
-            margin-top: 10px; transition: 0.3s;
-        }
-        .main-btn:hover { transform: scale(1.02); background: #000; }
-
-        #qr-box { 
-            display: none; margin-top: 20px; text-align: center; padding: 20px; 
-            background: #fffbeb; border: 2px dashed var(--gold); border-radius: 20px; 
-        }
-
-        /* تصميم شاشة الزبون الداخلية */
-        .screen { background: white; height: 100%; border-radius: 30px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
-        .screen-img { height: 200px; background: #cbd5e1 center/cover; position: relative; }
-        .screen-price { position: absolute; bottom: 10px; right: 10px; background: var(--gold); padding: 5px 15px; border-radius: 10px; font-weight: 900; font-size: 18px; }
-        .screen-body { padding: 20px; text-align: right; }
-
-        @media (max-width: 850px) { .app-container { grid-template-columns: 1fr; } .preview-area { position: static; height: 600px; } }
+        @media (max-width: 900px) { .app-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
-<div class="app-container">
+<div class="app-grid">
     
-    <div class="inputs-area">
-        <h2 style="margin:0; color:var(--dark);">✨ نظام المولد الذكي</h2>
-        <p style="margin:0 0 20px 0; color:#64748b; font-size:14px;">أدخل بيانات العقار وسيتم تحديث المعاينة فوراً</p>
-
-        <div class="field">
-            <label>صورة العقار الرئيسية</label>
-            <input type="file" accept="image/*" onchange="updateImg(this)">
+    <aside class="admin-sidebar">
+        <h2 style="margin-top:0;">إضافة عرض جديد</h2>
+        <div class="form-group">
+            <label>صورة العقار (رابط أو ارفق ملف)</label>
+            <input type="file" id="p-file" accept="image/*">
         </div>
-
-        <div class="field">
-            <label>اسم العقار</label>
-            <input type="text" id="ititle" placeholder="مثلاً: فيلا مودرن للبيع" oninput="sync()">
+        <div class="form-group">
+            <label>عنوان العقار</label>
+            <input type="text" id="p-title" placeholder="مثلاً: فيلا حي النرجس">
         </div>
-
-        <div class="field">
-            <label>السعر المطلوب</label>
-            <input type="text" id="iprice" placeholder="2,500,000" oninput="sync()">
+        <div class="form-group">
+            <label>السعر</label>
+            <input type="text" id="p-price" placeholder="2,500,000">
         </div>
+        <button class="btn-add" onclick="addProperty()">نشر العرض في المعرض ✨</button>
 
-        <div class="field">
-            <label>وصف العقار</label>
-            <textarea id="idesc" rows="3" placeholder="اكتب التفاصيل..." oninput="sync()"></textarea>
+        <div class="qr-section">
+            <label>كود معرضك الشخصي</label>
+            <div id="qrcode"></div>
+            <p style="font-size: 11px; margin:0;">هذا الكود يفتح للزبائن "جميع العروض"</p>
+            <button onclick="generateProfileQR()" style="margin-top:10px; background:none; border:1px solid #ddd; cursor:pointer; font-size:11px; border-radius:5px;">تحديث الكود</button>
         </div>
+    </aside>
 
-        <button class="main-btn" onclick="generateQR()">توليد كود البار (QR) 🚀</button>
-
-        <div id="qr-box">
-            <div id="qr-output" style="display: flex; justify-content: center; margin-bottom: 10px;"></div>
-            <p style="font-weight: 900; font-size: 14px; margin: 5px 0;">الكود جاهز للإرسال!</p>
-            <button onclick="downloadQR()" style="background:none; border:1px solid #ccc; padding:5px 10px; border-radius:5px; cursor:pointer; font-size:12px;">تحميل الكود كصورة 💾</button>
-        </div>
-    </div>
-
-    <div class="preview-area">
-        <div class="screen">
-            <div id="v-img" class="screen-img">
-                <div id="v-price" class="screen-price">0 ر.س</div>
+    <main class="gallery-area">
+        <div class="gallery-header">
+            <div>
+                <h1 style="margin:0;">معرض العقارات الرقمي</h1>
+                <p style="margin:0; color:#64748b; font-size:14px;">جميع العروض المتاحة حالياً</p>
             </div>
-            <div class="screen-body">
-                <h3 id="v-title" style="margin:0; color:var(--dark);">اسم العقار</h3>
-                <p id="v-desc" style="font-size:14px; color:#475569; line-height:1.6; margin:15px 0;">الوصف يظهر هنا...</p>
-                
-                <div style="background:#f1f5f9; padding:15px; border-radius:15px; display:flex; justify-content:space-around; margin-bottom:20px;">
-                    <div style="text-align:center;"><b style="font-size:20px;">1,240</b><br><span style="font-size:10px;">مشاهدة</span></div>
-                    <div style="text-align:center;"><b style="font-size:20px; color:var(--green);">42</b><br><span style="font-size:10px;">مهتم</span></div>
-                </div>
-
-                <div style="background:var(--green); color:white; text-align:center; padding:15px; border-radius:12px; font-weight:900;">تواصل عبر واتساب</div>
+            <div id="stats-total" style="background:var(--main); color:white; padding:10px 20px; border-radius:12px; text-align:center;">
+                <span style="font-size:10px; display:block;">إجمالي المشاهدات</span>
+                <b id="total-views-val">0</b>
             </div>
         </div>
-    </div>
 
+        <div class="properties-grid" id="main-gallery">
+            </div>
+    </main>
 </div>
 
 <script>
-    // 1. مزامنة الصورة
-    function updateImg(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => document.getElementById('v-img').style.backgroundImage = `url('${e.target.result}')`;
-            reader.readAsDataURL(input.files[0]);
-        }
+    // قاعدة بيانات وهمية (تُخزن في المتصفح حالياً)
+    let myProperties = JSON.parse(localStorage.getItem('my_listings') || "[]");
+    let totalViews = localStorage.getItem('total_views') || 0;
+
+    // وظيفة إضافة عقار جديد
+    function addProperty() {
+        const title = document.getElementById('p-title').value;
+        const price = document.getElementById('p-price').value;
+        const fileInput = document.getElementById('p-file');
+
+        if(!title || !price) return alert("أكمل البيانات");
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const newProp = {
+                id: Date.now(),
+                title: title,
+                price: price,
+                img: e.target.result
+            };
+            myProperties.push(newProp);
+            localStorage.setItem('my_listings', JSON.stringify(myProperties));
+            renderGallery();
+            // تصفير الحقول
+            document.getElementById('p-title').value = "";
+            document.getElementById('p-price').value = "";
+        };
+        
+        if(fileInput.files[0]) reader.readAsDataURL(fileInput.files[0]);
+        else alert("ارفق صورة للعقار");
     }
 
-    // 2. مزامنة النصوص
-    function sync() {
-        document.getElementById('v-title').innerText = document.getElementById('ititle').value || "اسم العقار";
-        document.getElementById('v-price').innerText = (document.getElementById('iprice').value || "0") + " ر.س";
-        document.getElementById('v-desc').innerText = document.getElementById('idesc').value || "الوصف يظهر هنا...";
+    // وظيفة عرض المعرض
+    function renderGallery() {
+        const container = document.getElementById('main-gallery');
+        container.innerHTML = myProperties.map(p => `
+            <div class="prop-card">
+                <div class="prop-img" style="background-image: url('${p.img}')"></div>
+                <div class="prop-info">
+                    <h3 style="margin:0; font-size:16px;">${p.title}</h3>
+                    <p style="color:var(--gold); font-weight:900; margin:10px 0;">${p.price} ر.س</p>
+                    <button onclick="deleteProp(${p.id})" style="background:#fee2e2; color:#b91c1c; border:none; padding:5px 10px; border-radius:5px; font-size:11px; cursor:pointer;">حذف</button>
+                </div>
+            </div>
+        `).join('');
+        
+        document.getElementById('total-views-val').innerText = totalViews;
     }
 
-    // 3. توليد الكود (النسخة الآمنة)
-    function generateQR() {
-        const title = document.getElementById('ititle').value;
-        if(!title) { alert("أدخل اسم العقار أولاً!"); return; }
-
-        const container = document.getElementById('qr-output');
-        container.innerHTML = ""; // مسح القديم
-
-        try {
-            // محاولة استخدام المكتبة
-            new QRCode(container, {
-                text: "https://your-site.com/view?id=" + Date.now(),
-                width: 160,
-                height: 160,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
-            document.getElementById('qr-box').style.display = 'block';
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        } catch (err) {
-            // حل بديل في حال فشل المكتبة: استخدام Google Charts API كخطة بديلة فورية
-            const googleQR = `https://chart.googleapis.com/chart?chs=160x160&cht=qr&chl=${encodeURIComponent(window.location.href)}&choe=UTF-8`;
-            container.innerHTML = `<img src="${googleQR}" alt="QR Code">`;
-            document.getElementById('qr-box').style.display = 'block';
-        }
+    // وظيفة توليد QR للملف الشخصي بالكامل
+    function generateProfileQR() {
+        const qrDiv = document.getElementById("qrcode");
+        qrDiv.innerHTML = "";
+        // الرابط هنا يشير إلى صفحة "المعرض" الخاصة بصاحب الموقع
+        new QRCode(qrDiv, {
+            text: window.location.href + "?user=admin",
+            width: 140,
+            height: 140
+        });
     }
 
-    // 4. تحميل الكود كصورة
-    function downloadQR() {
-        const img = document.querySelector('#qr-output img');
-        if(!img) return;
-        const link = document.createElement('a');
-        link.href = img.src;
-        link.download = 'Property-QR.png';
-        link.click();
+    function deleteProp(id) {
+        myProperties = myProperties.filter(p => p.id !== id);
+        localStorage.setItem('my_listings', JSON.stringify(myProperties));
+        renderGallery();
     }
+
+    // تشغيل النظام
+    renderGallery();
+    generateProfileQR();
+    
+    // محاكاة زيادة المشاهدات عند كل دخول
+    localStorage.setItem('total_views', parseInt(totalViews) + 1);
 </script>
 
 </body>
